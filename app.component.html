@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="text/javascript" src="./node_modules/canvasjs/dist/canvasjs.min.js"></script>
+</head>
+
+<body>
+<form [formGroup]="addressForm" class="form-control col-sm-8 offset-sm-2 mt-sm-5" name="myForm" (ngSubmit)="onSubmit();submitted=true;received=false;tabGroup.selectedIndex=0" autocomplete="off" novalidate style="background-color:#5E8BA4;height:600px">
+      <legend style=color:white;text-align:center;font-size:30pt;margin-top:35px;border-style:none;>Weather Search</legend>
+
+<div class="form-group row mt-sm-5">
+      <label class="control-label col-sm-2 offset-sm-1">Street<i class="material-icons" style=color:red;font-size:8px;vertical-align:top>star</i></label>
+      <div class="col-sm-6">
+        <input type="text" class="form-control" formControlName="Street" id="street" placeholder="Enter Street Name" name="street" required style=border-color:black>
+      </div>
+
+</div>
+
+<div class="form-group row mt-sm-4">
+  <label class="control-label col-sm-2 offset-sm-1">City<i class="material-icons" style=color:red;font-size:8px;vertical-align:top>star</i></label>
+<div class="col-sm-6">
+        	<input matInput type="text" class="form-control" formControlName="City" id="city" placeholder="Enter City Name" autocomplete="off" [matAutocomplete]="auto" style=border-color:black>
+ 		<mat-autocomplete #auto="matAutocomplete">
+			<mat-option *ngFor="let item of searchResult" [value]="item">
+			{{ item }}
+    			</mat-option>
+  		</mat-autocomplete>
+</div>
+</div>
+
+<div class="form-group row mt-sm-4">
+   <label class="control-label col-sm-2 offset-sm-1">State<i class="material-icons" style=color:red;font-size:8px;vertical-align:top>star</i></label>
+   <div class="col-sm-6">
+	<select formControlName="State" class="custom-select" style=width:560px;height:37px;border-color:black>          
+		<option value='' selected>Select State</option>
+ 		<option *ngFor="let v of values" [value]="v.Abbreviation" (ngModelChange)="onChange($event)">  
+    		{{v.State}}
+  		</option>
+	</select>
+   </div>
+</div>
+
+<div class="form-group row">        
+       <div class="checkbox col-sm-6">
+       <label class="control-label" style=margin-left:80px><input type="checkbox" name="current_location"> Current Location</label>
+       </div>
+</div>
+
+<div class="btn-toolbar" style=margin-left:60px>
+	<div class="btn mr-2">
+        	<button type="submit" class="form-control" [disabled]="!addressForm.valid"><i class="material-icons" style=vertical-align:middle>search</i>Search</button>
+       	</div>
+     	<div class="btn mr-2">
+       		<button type="clear" class="form-control" (click)="resetForms();submitted=false" style=color:gray><i class="material-icons" style=vertical-align:middle>clear_all</i>Clear</button>
+      	</div>
+</div>
+</form>
+
+<div class="progress col-sm-10 offset-sm-1 mt-sm-5" *ngIf="submitted && !received">
+  <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 50%;"></div>
+</div>
+
+<div class="col text-center" style=margin-top:25px>
+        <div class="btn mr-2">
+        	<button type="button" class="btn btn-default" style=color:white;background-color:#688AA1;border-color:black >Results</button>
+        </div>
+        <div class="btn mr-2">
+        	<button type="button" class="btn btn-default"  style=color:gray;border-color:black>Favorites</button>
+        </div>
+</div>
+
+
+<mat-tab-group class="tab-group offset-md-1" mat-align-tabs="start" [hidden]="!submitted" #tabGroup (selectedTabChange)='onSelectChange($event)'>
+
+  <mat-tab label="Current">
+<div class="card col-sm-6 offset-sm-3 mt-sm-5 mb-sm-4" style=background-color:#99D0F0;border-radius:8px;color:black;font-size:40px>
+  <div class="card-body offset-md-1 mt-md-5">
+    <div class="card-text" style=font-size:40px>{{addressForm.controls['City'].value}}</div>
+    <p class="card-img">
+	{{tzone}}
+	 <img class="float-right" src={{seal}} style=width:250px;height:250px;color:#99D0F0>	
+   </p>
+    <div class="card-img mt-sm-3" style=font-size:60px>
+	{{temp}}<img src='https://cdn3.iconfinder.com/data/icons/virtual-notebook/16/button_shape_oval-512.png' style=height:15px;width:15px;vertical-align:top><span style=font-size:60px>&nbsp;F</span>
+    </div>
+    <p class="card-text mt-sm-4" style=font-size:25px>{{summ}}</p>
+
+<div class="card-img mt-sm-5 mb-sm-4" style=display:flex;justify-content:space-evenly;padding-top:1em>
+            <div style=text-align:center>   
+             <div><img src="https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-16-512.png" matTooltip="Humidity" matTooltipPosition="above" style=height:50px;width:50px></div>
+             <div style=font-size:25px;font-weight:600>{{humidity}}</div>
+            </div>
+            <div style=text-align:center>
+              <div><img src='https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-25-512.png' matTooltip="Pressure" matTooltipPosition="above" style=height:50px;width:50px></div>
+              <div style=font-size:25px;font-weight:600>{{pressure}}</div>
+            </div>
+            <div style=text-align:center>
+              <div><img src='https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-27-512.png' matTooltip="Wind Speed" matTooltipPosition="above" style=height:50px;width:50px></div>
+              <div style=font-size:25px;font-weight:600>{{windSpeed}}</div>
+            </div>
+            <div style=text-align:center>
+              <div><img src='https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-30-512.png' matTooltip="Visibility" matTooltipPosition="above" style=height:50px;width:50px></div>
+              <div style=font-size:25px;font-weight:600>{{visibility}}</div>
+            </div>
+            <div style=text-align:center>
+              <div><img src='https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-28-512.png' matTooltip="Cloud Cover" matTooltipPosition="above" style=height:50px;width:50px ></div>
+              <div style=font-size:25px;font-weight:600>{{cloudCover}}</div>
+            </div>
+            <div style=text-align:center>
+              <div><img src='https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-24-512.png' matTooltip="Ozone" matTooltipPosition="above" style=height:50px;width:50px></div>
+              <div style=font-size:25px;font-weight:600>{{ozone}}</div>
+            </div>
+</div>
+
+</div>
+</div>
+</mat-tab>
+
+<script src="node_modules/chart.js/src/chart.js"></script>i
+
+<mat-tab label="Hourly" >
+<ng-template matTabContent>
+ <select class="form-control-select" [(ngModel)]="optionValue" (change)="updateChart()" style=margin-left:5px;margin-top:10px>
+    <option value="temp">Temperature</option>
+    <option value="pres">Pressure</option>
+    <option value="humid">Humidity</option>
+    <option value="ozone">Ozone</option>
+    <option value="vis">Visibility</option>
+    <option value="wind">Wind Speed</option>
+  </select>
+
+<ng-container>
+  <div style="display:block;margin-right:text-align:center">
+    <canvas baseChart   
+            [datasets]="barChartData"
+            [labels]="barChartLabels"
+            [options]="barChartOptions"
+            [legend]="barChartLegend"
+            [chartType]="barChartType">
+    </canvas>
+  </div>
+</ng-container>
+</ng-template>
+</mat-tab>
+
+<mat-tab label="Weekly">
+<div id="canvasjsContainer" style="height: 400px; width: 80%; margin: 10%;"></div>
+
+</mat-tab>
+
+</mat-tab-group>
+
+<div class="modal" id="myModal" style="display:none">
+{{daily_weather}}
+<div class="modal-dialog" role="document">
+<div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" (click)="closeModal()" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+<div class="modal-body">
+<div class="card col-sm-6 offset-sm-3 mt-sm-5 mb-sm-4" style=background-color:#99D0F0;border-radius:8px;color:black;font-size:40px>
+  <div class="card-body offset-md-1 mt-md-5">
+    <div class="card-text" style=font-size:40px>Weather Card - elements not displaying</div>
+    <div class="card-img" style=font-size:40px>
+        {{daily_weather}} <img src='https://cdn3.iconfinder.com/data/icons/virtual-notebook/16/button_shape_oval-512.png' style=height:15px;width:15px;vertical-align:top><span style=font-size:60px>&nbsp;F</span>
+	{{daily_summary}}
+    </div>
+    <div class="card-img mt-sm-3" style=font-size:60px>
+    </div>
+    <p class="card-text mt-sm-4" style=font-size:25px>{{daily_summary}}</p>
+     </div>
+
+	</div>
+	</div>
+</div>
+</div>
+</div>
+
+</body>
+</html>
